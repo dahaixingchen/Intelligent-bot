@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.intelligent.bot.dao.MjTaskDao">
+
+    <select id="selectUserMjTask" resultType="com.intelligent.bot.model.res.sys.MjTaskRes">
+        select m.id,
+               m.related_task_id,
+               m.`action` as taskAction,
+               m. prompt,
+               m.prompt_en,
+               m.`index`,
+               m.status,
+               m.image_url,
+               m.start_time,
+               m.finish_time,
+               m.final_prompt,
+               m.fail_reason,
+               m.public_status,
+               m.plot_mode,
+               mj.`action` as relatedTaskAction
+        from mj_task m
+        left join mj_task mj on m.related_task_id = mj.id
+        where m.user_id = #{userId} and m.deleted = 0 and m.action != 'DESCRIBE' and m.action != 'SHORTEN'
+        order by m.id desc
+    </select>
+    <select id="selectTransform" resultType="com.intelligent.bot.model.res.sys.MjTaskTransformRes">
+        select   `action`, `index` ,related_task_id
+        from mj_task
+        where `index` > 0
+    </select>
+    <delete id="batchDeleteByUserId">
+        delete from mj_task where user_id = #{userId}
+    </delete>
+    <delete id="deleteByKeyId">
+        delete from mj_task where id = #{id}
+    </delete>
+    <select id="getGallery" resultType="com.intelligent.bot.model.res.sys.GalleryRes">
+        SELECT
+            m.prompt_en,
+            m.prompt,
+            m.image_url,
+            m.create_time,
+            t.NAME,
+            t.avatar
+        FROM
+            mj_task m
+                LEFT JOIN t_user t ON t.id = m.user_id
+        WHERE
+            m.deleted = 0
+          AND action != 'DESCRIBE'
+          AND action != 'SHORTEN'
+          AND STATUS = 'SUCCESS'
+          AND public_status = 0
+        ORDER BY
+            m.id DESC
+    </select>
+</mapper>

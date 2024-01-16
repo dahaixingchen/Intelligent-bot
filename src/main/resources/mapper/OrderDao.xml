@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.intelligent.bot.dao.OrderDao">
+
+
+    <select id="userOrderList" resultType="com.intelligent.bot.model.res.sys.ClientOrderRes">
+        select
+            t.id,
+            t.price,
+            t.pay_number,
+            t.state,
+            t.pay_type,
+            t.trade_no ,
+            p.name as productName,
+            t.create_time
+        from t_order t
+        left join product p on p.id = t.product_id
+        where user_id = #{userId}
+        order by t.id desc
+    </select>
+    <select id="queryOrder" resultType="com.intelligent.bot.model.res.sys.admin.OrderQueryRes">
+        SELECT
+            t.id,
+            t.create_time,
+            p.`name` AS productName,
+            u.`name` as userName,
+            u.mobile,
+            t.price,
+            t.pay_number,
+            t.pay_type,
+            t.state,
+            t.trade_no,
+            t.msg
+        FROM
+            t_order t
+                LEFT JOIN product p ON p.id = t.product_id
+                LEFT JOIN `t_user` u ON u.id = t.user_id
+        where t.deleted = 0
+        <if test="req.mobile != null and req.mobile != ''">
+            <bind name="mobile" value="'%'+req.mobile+'%'"/>
+            and u.mobile like #{mobile}
+        </if>
+        <if test="req.state != null ">
+            and t.state like #{req.state}
+        </if>
+        order by u.id desc
+    </select>
+    <select id="queryHomeOrder" resultType="com.intelligent.bot.model.res.sys.admin.AdminHomeOrder">
+        SELECT
+            count( 1 ) AS orderNumber,
+            date_format ( create_time, '%Y-%m-%d' ) as days
+        FROM
+            t_order
+        WHERE
+                YEAR ( create_time ) = YEAR (
+                    now())
+          AND MONTH ( create_time )
+        GROUP BY
+            date_format(
+                    create_time,
+                    '%Y-%m-%d'
+                )
+    </select>
+    <select id="queryHomeOrderPrice" resultType="com.intelligent.bot.model.res.sys.admin.AdminHomeOrderPrice">
+        SELECT
+            sum( price ) AS price,
+            date_format ( create_time, '%Y-%m-%d' ) AS days
+        FROM
+            t_order
+        WHERE
+                YEAR ( create_time ) = YEAR (
+                    now())
+          AND MONTH ( create_time )
+          and state = 1
+        GROUP BY
+            date_format(
+                    create_time,
+                    '%Y-%m-%d'
+                )
+    </select>
+</mapper>

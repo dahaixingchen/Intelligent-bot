@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.intelligent.bot.dao.SignInDao">
+
+
+    <select id="querySignIn" resultType="com.intelligent.bot.model.SignIn">
+        select number,sign_in_date
+        from sign_in
+        where user_id = #{userId}
+        order by id desc
+    </select>
+</mapper>
